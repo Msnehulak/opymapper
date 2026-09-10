@@ -1,0 +1,51 @@
+ADD_TO_BEAT_MAP = ["General", "Metadata", "Difficulty", "Colours", "HitObjects"]
+
+
+class CreateDiff:
+    def __init__(self) -> None:
+        self.beatmap = {
+            "format": 14,
+            "General": {},
+            "Metadata": {},
+            "Difficulty": {},
+            "Colours": {},
+            "HitObjects": {},
+        }
+
+    @property
+    def beatmap_content(self) -> str:
+        content = []
+        content.append("osu file format v14")
+        content.append("")
+
+        for category, data in self.beatmap.items():
+            if category in ADD_TO_BEAT_MAP:
+                content.append(f"[{category}]")
+                for key, value in data.items():
+                    content.append(f"{key}:{value}")
+                content.append("")
+
+        return "\n".join(content)
+
+
+PROPERTIES_MAP = {
+    "title": ("Metadata", "Title"),
+    "hp": ("Difficulty", "HPDrainRate"),
+    "cs": ("Difficulty", "CircleSize"),
+    "od": ("Difficulty", "OverallDifficulty"),
+    "ar": ("Difficulty", "ApproachRate"),
+}
+
+
+def _make_property(category: str, key: str):
+    def getter(self):
+        return self.beatmap[category].get(key)
+
+    def setter(self, value):
+        self.beatmap[category][key] = value
+
+    return property(getter, setter)
+
+
+for prop_name, (category, key) in PROPERTIES_MAP.items():
+    setattr(CreateDiff, prop_name, _make_property(category, key))

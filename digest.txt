@@ -1,0 +1,156 @@
+Directory structure:
+└── opmaper/
+    ├── pytest.ini
+    ├── requirements.txt
+    ├── opmaper/
+    │   ├── __init__.py
+    │   ├── diff_create.py
+    │   └── map_create.py
+    └── tests/
+        └── beatmap_test.py
+
+================================================
+FILE: pytest.ini
+================================================
+[pytest]
+pythonpath = .
+
+
+
+================================================
+FILE: requirements.txt
+================================================
+pytest
+
+
+
+================================================
+FILE: opmaper/__init__.py
+================================================
+from . import diff_create, map_create
+
+
+def new_diff():
+    return diff_create.CreateDiff()
+
+
+
+================================================
+FILE: opmaper/diff_create.py
+================================================
+ADD_TO_BEAT_MAP = ["General", "Metadata", "Difficulty", "Colours", "HitObjects"]
+
+
+class CreateDiff:
+    def __init__(self) -> None:
+        self.beatmap = {
+            "format": 14,
+            "General": {},
+            "Metadata": {},
+            "Difficulty": {},
+            "Colours": {},
+            "HitObjects": {},
+        }
+
+    @property
+    def title(self):
+        return self.beatmap["Metadata"]["Title"]
+
+    @title.setter
+    def title(self, value):
+        self.beatmap["Metadata"]["Title"] = value
+
+    @property
+    def beatmap_content(self) -> str:
+        content = []
+        content.append("osu file format v14")
+        content.append("")
+
+        for category, data in self.beatmap.items():
+            if category in ADD_TO_BEAT_MAP:
+                content.append(f"[{category}]")
+                for key, value in data.items():
+                    content.append(f"{key}:{value}")
+                content.append("")
+
+        return "\n".join(content)
+
+
+PROPERTIES_MAP = {
+    # Metadata
+    "title": ("Metadata", "Title"),
+    # Difficulty
+    "hp": ("Difficulty", "HPDrainRate"),
+    "cs": ("Difficulty", "CircleSize"),
+    "od": ("Difficulty", "OverallDifficulty"),
+    "ar": ("Difficulty", "ApproachRate"),
+}
+
+
+def _make_property(category: str, key: str):
+    def getter(self):
+        return self.beatmap[category].get(key)
+
+    def setter(self, value):
+        self.beatmap[category][key] = value
+
+    return property(getter, setter)
+
+
+# Dynamické přidání všech getterů a setterů do třídy
+for prop_name, (category, key) in PROPERTIES_MAP.items():
+    setattr(CreateDiff, prop_name, _make_property(category, key))
+
+
+
+================================================
+FILE: opmaper/map_create.py
+================================================
+[Empty file]
+
+
+================================================
+FILE: tests/beatmap_test.py
+================================================
+import random
+import string
+
+import opmaper
+
+CHARACTERS = string.ascii_letters + string.digits
+
+
+def test_new_diff():
+    test_title = "".join(random.choices(CHARACTERS, k=10))
+    test_ar = random.randint(0, 10)
+    test_hp = random.randint(0, 10)
+    test_cs = random.randint(0, 10)
+    test_od = random.randint(0, 10)
+
+    diff = opmaper.new_diff()
+    diff.title = test_title
+    diff.ar = test_ar
+    diff.od = test_od
+    diff.hp = test_hp
+    diff.cs = test_cs
+
+    DIFF_TEST_FORMAT = f"""osu file format v14
+
+[General]
+
+[Metadata]
+Title:{test_title}
+
+[Difficulty]
+HPDrainRate:{test_hp}
+CircleSize:{test_cs}
+OverallDifficulty:{test_od}
+ApproachRate:{test_od}
+
+[Colours]
+
+[HitObjects]
+"""
+    assert diff.beatmap_content == DIFF_TEST_FORMAT
+
+
