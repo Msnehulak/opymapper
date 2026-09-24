@@ -1,13 +1,59 @@
 Directory structure:
 └── opmaper/
+    ├── README.md
+    ├── pyproject.toml
     ├── pytest.ini
     ├── requirements.txt
-    ├── opmaper/
+    ├── opymapper/
     │   ├── __init__.py
     │   ├── diff_create.py
     │   └── map_create.py
-    └── tests/
-        └── beatmap_test.py
+    ├── tests/
+    │   └── beatmap_test.py
+    └── .github/
+        └── workflows/
+            └── tests.yaml
+
+================================================
+FILE: README.md
+================================================
+[![Run Pytest](https://github.com/Msnehulak/opmaper/actions/workflows/tests.yaml/badge.svg)](https://github.com/Msnehulak/opmaper/actions/workflows/tests.yaml)
+
+# OPYMAPPER (OSU python mapper)
+opymapper is a tool in Python to create osu! beatmaps programmatically. Developed with Test Driven Development.
+
+[PyPi](https://pypi.org/project/opymapper/)
+
+
+
+================================================
+FILE: pyproject.toml
+================================================
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opymapper"
+version = "0.1.0b1"
+authors = [
+  { name="Msnehulak", email="pypi@snehulak.dev" },
+]
+description = "A Python tool to create osu! beatmaps programmatically."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Msnehulak/opymapper"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["opymapper*"]  
+
+
 
 ================================================
 FILE: pytest.ini
@@ -25,7 +71,7 @@ pytest
 
 
 ================================================
-FILE: opmaper/__init__.py
+FILE: opymapper/__init__.py
 ================================================
 from . import diff_create, map_create
 
@@ -36,7 +82,7 @@ def new_diff():
 
 
 ================================================
-FILE: opmaper/diff_create.py
+FILE: opymapper/diff_create.py
 ================================================
 import logging
 
@@ -89,7 +135,7 @@ def _make_property_stats(category: str, key: str):
         if 0.0 <= value <= 10.0:
             if round(value, 1) != value:
                 logging.warning(
-                    f"{value} is more then one decimal, rounded to {round(value)}"
+                    f"{value} has more than one decimal place, rounded to {round(value, 1)}"
                 )
             self.beatmap[category][key] = round(value, 1)
         else:
@@ -117,7 +163,7 @@ for prop_name, (category, key) in PROPERTIES_MAP_STATS.items():
 
 
 ================================================
-FILE: opmaper/map_create.py
+FILE: opymapper/map_create.py
 ================================================
 [Empty file]
 
@@ -125,12 +171,12 @@ FILE: opmaper/map_create.py
 ================================================
 FILE: tests/beatmap_test.py
 ================================================
+import logging
 import random
 import string
 
-import pytest
-
 import opmaper
+import pytest
 
 CHARACTERS = string.ascii_letters + string.digits
 
@@ -170,11 +216,17 @@ CircleSize:{test_cs}
 
 
 @pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
-@pytest.mark.parametrize("val", [0.0676767, 2.555, 5.001, 7.2525, 10.0000])
-def test_stats_rounding(stat, val):
+@pytest.mark.parametrize("val", [0.0676767, 2.555, 5.001, 7.2525, 9.9999])
+def test_stats_rounding(caplog, stat, val):
     diff = opmaper.new_diff()
-    setattr(diff, stat, val)
+
+    with caplog.at_level(logging.WARNING):
+        setattr(diff, stat, val)
+
     assert getattr(diff, stat) == round(val, 1)
+
+    assert len(caplog.records) == 1
+    assert "has more than one decimal place" in caplog.text
 
 
 @pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
@@ -191,5 +243,40 @@ def test_stats_out_of_range(stat, val):
     diff = opmaper.new_diff()
     with pytest.raises(ValueError):
         setattr(diff, stat, val)
+
+
+
+================================================
+FILE: .github/workflows/tests.yaml
+================================================
+name: Run Pytest
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run Pytest
+      run: |
+        pytest
 
 

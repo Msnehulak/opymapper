@@ -1,7 +1,9 @@
 map_test.osz
 map_test.zip
+opymapper.egg-info
 
 map_test/
+dist/
 
 **/__pycache__/
 __pycache__/

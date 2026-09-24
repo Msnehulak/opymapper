@@ -49,7 +49,7 @@ def _make_property_stats(category: str, key: str):
         if 0.0 <= value <= 10.0:
             if round(value, 1) != value:
                 logging.warning(
-                    f"{value} is more then one decimal, rounded to {round(value)}"
+                    f"{value} has more than one decimal place, rounded to {round(value, 1)}"
                 )
             self.beatmap[category][key] = round(value, 1)
         else:
