@@ -1,3 +1,5 @@
+import logging
+
 ADD_TO_BEAT_MAP = ["General", "Metadata", "Difficulty", "Colours", "HitObjects"]
 
 
@@ -12,8 +14,7 @@ class CreateDiff:
             "HitObjects": {},
         }
 
-    @property
-    def beatmap_content(self) -> str:
+    def get_beatmap_content(self) -> str:
         content = []
         content.append("osu file format v14")
         content.append("")
@@ -28,13 +29,33 @@ class CreateDiff:
         return "\n".join(content)
 
 
-PROPERTIES_MAP = {
-    "title": ("Metadata", "Title"),
+PROPERTIES_MAP_STATS = {
     "hp": ("Difficulty", "HPDrainRate"),
     "cs": ("Difficulty", "CircleSize"),
     "od": ("Difficulty", "OverallDifficulty"),
     "ar": ("Difficulty", "ApproachRate"),
 }
+
+PROPERTIES_MAP = {
+    "title": ("Metadata", "Title"),
+}
+
+
+def _make_property_stats(category: str, key: str):
+    def getter(self):
+        return self.beatmap[category].get(key)
+
+    def setter(self, value: float):
+        if 0.0 <= value <= 10.0:
+            if round(value, 1) != value:
+                logging.warning(
+                    f"{value} is more then one decimal, rounded to {round(value)}"
+                )
+            self.beatmap[category][key] = round(value, 1)
+        else:
+            raise ValueError(f"{key} can only be between 0.0-10 {value}")
+
+    return property(getter, setter)
 
 
 def _make_property(category: str, key: str):
@@ -49,3 +70,6 @@ def _make_property(category: str, key: str):
 
 for prop_name, (category, key) in PROPERTIES_MAP.items():
     setattr(CreateDiff, prop_name, _make_property(category, key))
+
+for prop_name, (category, key) in PROPERTIES_MAP_STATS.items():
+    setattr(CreateDiff, prop_name, _make_property_stats(category, key))

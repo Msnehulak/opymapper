@@ -2,5 +2,11 @@ map_test.osz
 map_test.zip
 
 map_test/
+
+**/__pycache__/
 __pycache__/
+
+*.pyc
+*.pyo
+*.pyd
 

@@ -38,6 +38,8 @@ def new_diff():
 ================================================
 FILE: opmaper/diff_create.py
 ================================================
+import logging
+
 ADD_TO_BEAT_MAP = ["General", "Metadata", "Difficulty", "Colours", "HitObjects"]
 
 
@@ -52,16 +54,7 @@ class CreateDiff:
             "HitObjects": {},
         }
 
-    @property
-    def title(self):
-        return self.beatmap["Metadata"]["Title"]
-
-    @title.setter
-    def title(self, value):
-        self.beatmap["Metadata"]["Title"] = value
-
-    @property
-    def beatmap_content(self) -> str:
+    def get_beatmap_content(self) -> str:
         content = []
         content.append("osu file format v14")
         content.append("")
@@ -76,15 +69,33 @@ class CreateDiff:
         return "\n".join(content)
 
 
-PROPERTIES_MAP = {
-    # Metadata
-    "title": ("Metadata", "Title"),
-    # Difficulty
+PROPERTIES_MAP_STATS = {
     "hp": ("Difficulty", "HPDrainRate"),
     "cs": ("Difficulty", "CircleSize"),
     "od": ("Difficulty", "OverallDifficulty"),
     "ar": ("Difficulty", "ApproachRate"),
 }
+
+PROPERTIES_MAP = {
+    "title": ("Metadata", "Title"),
+}
+
+
+def _make_property_stats(category: str, key: str):
+    def getter(self):
+        return self.beatmap[category].get(key)
+
+    def setter(self, value: float):
+        if 0.0 <= value <= 10.0:
+            if round(value, 1) != value:
+                logging.warning(
+                    f"{value} is more then one decimal, rounded to {round(value)}"
+                )
+            self.beatmap[category][key] = round(value, 1)
+        else:
+            raise ValueError(f"{key} can only be between 0.0-10 {value}")
+
+    return property(getter, setter)
 
 
 def _make_property(category: str, key: str):
@@ -97,9 +108,11 @@ def _make_property(category: str, key: str):
     return property(getter, setter)
 
 
-# Dynamické přidání všech getterů a setterů do třídy
 for prop_name, (category, key) in PROPERTIES_MAP.items():
     setattr(CreateDiff, prop_name, _make_property(category, key))
+
+for prop_name, (category, key) in PROPERTIES_MAP_STATS.items():
+    setattr(CreateDiff, prop_name, _make_property_stats(category, key))
 
 
 
@@ -114,6 +127,8 @@ FILE: tests/beatmap_test.py
 ================================================
 import random
 import string
+
+import pytest
 
 import opmaper
 
@@ -142,15 +157,39 @@ def test_new_diff():
 Title:{test_title}
 
 [Difficulty]
+ApproachRate:{test_ar}
+OverallDifficulty:{test_od}
 HPDrainRate:{test_hp}
 CircleSize:{test_cs}
-OverallDifficulty:{test_od}
-ApproachRate:{test_od}
 
 [Colours]
 
 [HitObjects]
 """
-    assert diff.beatmap_content == DIFF_TEST_FORMAT
+    assert diff.get_beatmap_content() == DIFF_TEST_FORMAT
+
+
+@pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
+@pytest.mark.parametrize("val", [0.0676767, 2.555, 5.001, 7.2525, 10.0000])
+def test_stats_rounding(stat, val):
+    diff = opmaper.new_diff()
+    setattr(diff, stat, val)
+    assert getattr(diff, stat) == round(val, 1)
+
+
+@pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
+@pytest.mark.parametrize("val", [0.0, 2.5, 5.0, 7.5, 10.0])
+def test_stats_in_range(stat, val):
+    diff = opmaper.new_diff()
+    setattr(diff, stat, val)
+    assert getattr(diff, stat) == val
+
+
+@pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
+@pytest.mark.parametrize("val", [-10.0, -0.01, 10.01, 15.0, 100.0])
+def test_stats_out_of_range(stat, val):
+    diff = opmaper.new_diff()
+    with pytest.raises(ValueError):
+        setattr(diff, stat, val)
 
 

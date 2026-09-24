@@ -1,6 +1,8 @@
 import random
 import string
 
+import pytest
+
 import opmaper
 
 CHARACTERS = string.ascii_letters + string.digits
@@ -37,4 +39,28 @@ CircleSize:{test_cs}
 
 [HitObjects]
 """
-    assert diff.beatmap_content == DIFF_TEST_FORMAT
+    assert diff.get_beatmap_content() == DIFF_TEST_FORMAT
+
+
+@pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
+@pytest.mark.parametrize("val", [0.0676767, 2.555, 5.001, 7.2525, 10.0000])
+def test_stats_rounding(stat, val):
+    diff = opmaper.new_diff()
+    setattr(diff, stat, val)
+    assert getattr(diff, stat) == round(val, 1)
+
+
+@pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
+@pytest.mark.parametrize("val", [0.0, 2.5, 5.0, 7.5, 10.0])
+def test_stats_in_range(stat, val):
+    diff = opmaper.new_diff()
+    setattr(diff, stat, val)
+    assert getattr(diff, stat) == val
+
+
+@pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
+@pytest.mark.parametrize("val", [-10.0, -0.01, 10.01, 15.0, 100.0])
+def test_stats_out_of_range(stat, val):
+    diff = opmaper.new_diff()
+    with pytest.raises(ValueError):
+        setattr(diff, stat, val)
