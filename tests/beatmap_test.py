@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 
@@ -43,11 +44,17 @@ CircleSize:{test_cs}
 
 
 @pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
-@pytest.mark.parametrize("val", [0.0676767, 2.555, 5.001, 7.2525, 10.0000])
-def test_stats_rounding(stat, val):
+@pytest.mark.parametrize("val", [0.0676767, 2.555, 5.001, 7.2525, 9.9999])
+def test_stats_rounding(caplog, stat, val):
     diff = opmaper.new_diff()
-    setattr(diff, stat, val)
+
+    with caplog.at_level(logging.WARNING):
+        setattr(diff, stat, val)
+
     assert getattr(diff, stat) == round(val, 1)
+
+    assert len(caplog.records) == 1
+    assert "is more then one decimal" in caplog.text
 
 
 @pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
