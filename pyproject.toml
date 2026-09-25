@@ -10,6 +10,10 @@ authors = [
 ]
 description = "A Python tool to create osu! beatmaps programmatically."
 readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
 requires-python = ">=3.14"
 dependencies = [
 
