@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opymapper"
-version = "0.1.0b2"
+version = "0.1.0b3"
 authors = [
   { name="Msnehulak", email="pypi@snehulak.dev" },
 ]
 description = "A Python tool to create osu! beatmaps programmatically."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.14"
 dependencies = [
 
 ]

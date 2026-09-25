@@ -33,5 +33,5 @@ jobs:
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       # POKUD POUŽÍVÁŠ RUČNÍ API TOKEN (místo OIDC), odkomentuj následující řádky:
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      # with:
+      #   password: ${{ secrets.PYPI_API_TOKEN }}
