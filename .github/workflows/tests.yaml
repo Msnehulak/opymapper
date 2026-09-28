@@ -34,7 +34,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv pip install -r requirements.txt pytest
+        uv pip install ".[dev]"
 
     - name: Run Pytest
       continue-on-error: ${{ inputs.ignore_test_failures == true }}
