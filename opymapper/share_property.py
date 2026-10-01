@@ -23,6 +23,47 @@ class StatProperty:
         instance.beatmap[self.category][self.key] = round(value, 1)
 
 
+class ColorProperty:
+    def __init__(self, category: str, key: str):
+        self.category = category
+        self.key = key
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+
+        raw_val = instance.beatmap[self.category].get(self.key)
+        if raw_val is None:
+            return None
+
+        r, g, b = map(int, raw_val.split(","))
+        return (r, g, b)
+
+    def __set__(self, instance, value: tuple[int, int, int] | str):
+        rgb = self._parse_color(value)
+
+        instance.beatmap[self.category][self.key] = f"{rgb[0]},{rgb[1]},{rgb[2]}"
+
+    @staticmethod
+    def _parse_color(value) -> tuple[int, int, int]:
+        if isinstance(value, str):
+            hex_str = value.lstrip("#")
+            if len(hex_str) == 6:
+                try:
+                    return tuple(int(hex_str[i : i + 2], 16) for i in (0, 2, 4))
+                except ValueError:
+                    pass
+            raise ValueError(f"Invalid HEX color format: '{value}'")
+
+        elif isinstance(value, (tuple, list)) and len(value) == 3:
+            if all(isinstance(c, int) and 0 <= c <= 255 for c in value):
+                return (int(value[0]), int(value[1]), int(value[2]))
+
+        raise ValueError(
+            f"Color must be tuple[int, int, int] with values 0-255 or HEX string, got {value}"
+        )
+
+
 class UnicodeProperty:
     def __init__(self, category: str, key: str, is_ascii_target: bool = True):
         self.category = category

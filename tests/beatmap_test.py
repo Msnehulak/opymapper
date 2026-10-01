@@ -133,3 +133,64 @@ class TestMapStats:
         diff = opymapper.new_diff()
         with pytest.raises(ValueError):
             setattr(diff, stat, val)
+
+
+@pytest.mark.part4
+@pytest.mark.parametrize("combo_num", range(1, 9))
+class TestMapColors:
+    @pytest.mark.parametrize(
+        "colors",
+        [(22, 70, 165), (19, 253, 248), (131, 51, 163), (223, 9, 97), (204, 60, 236)],
+    )
+    def test_combo_color_rgb(self, colors, combo_num):
+        diff = opymapper.new_diff()
+        attr_name = f"color_combo_{combo_num}"
+        setattr(diff, attr_name, colors)
+        assert getattr(diff, attr_name) == colors
+
+    @pytest.mark.parametrize(
+        "colors",
+        [
+            (473, 348, -44),
+            (489, 487, 465),
+            (-69, -42, 495),
+            (-107, -184, 382),
+            (453, -206, 279),
+        ],
+    )
+    def test_combo_color_rgb_out_of_range(self, colors, combo_num):
+        diff = opymapper.new_diff()
+        with pytest.raises(ValueError):
+            setattr(diff, f"color_combo_{combo_num}", colors)
+
+    @pytest.mark.parametrize(
+        "hex_code, expected_rgb",
+        [
+            ("#1646A5", (22, 70, 165)),
+            ("13FDF8", (19, 253, 248)),
+            ("#8333A3", (131, 51, 163)),
+            ("DF0961", (223, 9, 97)),
+            ("#CC3CEC", (204, 60, 236)),
+        ],
+    )
+    def test_combo_color_hex(self, combo_num, hex_code, expected_rgb):
+        diff = opymapper.new_diff()
+        attr_name = f"color_combo_{combo_num}"
+        setattr(diff, attr_name, hex_code)
+        assert getattr(diff, attr_name) == expected_rgb
+
+    @pytest.mark.parametrize(
+        "invalid_hex",
+        [
+            "#FFF",
+            "12345",
+            "1234567",
+            "#GGGGGG",
+            "12345Z",
+            "",
+        ],
+    )
+    def test_combo_color_hex_out_of_range(self, combo_num, invalid_hex):
+        diff = opymapper.new_diff()
+        with pytest.raises(ValueError):
+            setattr(diff, f"color_combo_{combo_num}", invalid_hex)

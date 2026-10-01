@@ -11,6 +11,15 @@ class CreateDiff:
     hp = ShareP.StatProperty("Difficulty", "HPDrainRate")
     od = ShareP.StatProperty("Difficulty", "OverallDifficulty")
 
+    color_combo_1 = ShareP.ColorProperty("Colours", "Combo1")
+    color_combo_2 = ShareP.ColorProperty("Colours", "Combo2")
+    color_combo_3 = ShareP.ColorProperty("Colours", "Combo3")
+    color_combo_4 = ShareP.ColorProperty("Colours", "Combo4")
+    color_combo_5 = ShareP.ColorProperty("Colours", "Combo5")
+    color_combo_6 = ShareP.ColorProperty("Colours", "Combo6")
+    color_combo_7 = ShareP.ColorProperty("Colours", "Combo7")
+    color_combo_8 = ShareP.ColorProperty("Colours", "Combo8")
+
     title = ShareP.UnicodeProperty("Metadata", "Title", is_ascii_target=True)
     title_unicode = ShareP.UnicodeProperty("Metadata", "Title", is_ascii_target=False)
 
