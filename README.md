@@ -11,6 +11,27 @@ opymapper is a tool in Python to create osu! beatmaps programmatically. Develope
 pip install opymapper
 ```
 
+## Development
+Clone repo
+### Install Dev dependencies
+```bash
+uv pip install ".[dev]"
+# or
+pip install -e ".[dev]"
+```
+
+### Install normal dependencies
+```bash
+uv pip install .
+# or
+pip install -e .
+```
+
+### Run pytest 
+```bash 
+pytest
+```
+
 ## Links
 [PyPi](https://pypi.org/project/opymapper/)
 [GitHub](https://github.com/Msnehulak/opymapper)
