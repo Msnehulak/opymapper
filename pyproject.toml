@@ -1,6 +1,6 @@
 [project]
 name = "opymapper"
-version = "0.1.0b5"
+version = "0.1.0b7"
 authors = [
   { name="Msnehulak", email="pypi@snehulak.dev" },
 ]
