@@ -59,8 +59,8 @@ class CreateDiff:
         self.hit_objects.append(slider)
         return slider
 
-    def add_spinner(self, time: int, spin_time: int, **kwargs) -> Spinner:
-        spinner = Spinner(time, spin_time, **kwargs)
+    def add_spinner(self, time: int, end_time: int, **kwargs) -> Spinner:
+        spinner = Spinner(time, end_time, **kwargs)
         self.hit_objects.append(spinner)
         return spinner
 
