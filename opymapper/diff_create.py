@@ -28,6 +28,8 @@ class CreateDiff:
     artist = ShareP.UnicodeProperty("Metadata", "Artist", is_ascii_target=True)
     artist_unicode = ShareP.UnicodeProperty("Metadata", "Artist", is_ascii_target=False)
 
+    audio = ShareP.FileProperty("General", "AudioFilename")
+
     def __init__(self) -> None:
         self.beatmap = {
             "format": 14,
@@ -39,6 +41,7 @@ class CreateDiff:
         }
         self.temp = {}
         self.hit_objects: List[BaseHitObject] = []
+        self.files = []
 
     def add_hit_object(self, obj: BaseHitObject) -> BaseHitObject:
         if not isinstance(obj, BaseHitObject):

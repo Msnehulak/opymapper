@@ -12,7 +12,8 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "pydantic"
+    "pydantic",
+    "fsspec",
 ]
 
 [project.optional-dependencies]

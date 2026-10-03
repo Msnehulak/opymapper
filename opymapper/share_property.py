@@ -1,5 +1,30 @@
 import logging
 import unicodedata
+from pathlib import Path
+
+
+class FileProperty:
+    def __init__(self, category: str, key: str):
+        self.category = category
+        self.key = key
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        return instance.beatmap[self.category].get(self.key)
+
+    def __set__(self, instance, value: str):
+        file = Path(value).resolve()
+        file_name = file.name
+
+        instance.files.append(
+            {
+                "name": file_name,
+                "path": file,
+            }
+        )
+
+        instance.beatmap[self.category][self.key] = file_name
 
 
 class StatProperty:

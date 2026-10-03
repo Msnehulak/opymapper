@@ -15,6 +15,15 @@ diff.add_slider(
 )
 
 diff.add_spinner(time=5000, spin_time=8000, new_combo=True)
+diff.audio = "/home/snehulak/Music/audio.ogg"
 
-for i in diff.hit_objects:
-    print(i.to_osu_string())
+
+for i in range(0, 10000, 100):
+    diff.add_circle(x=0, y=0, time=1000 + i, new_combo=True)
+    diff.add_circle(x=512, y=384, time=1050 + i, new_combo=True)
+
+mapset = opymapper.new_mapset()
+
+mapset.append_diff(diff)
+
+mapset.save_all("./test_ma/")
