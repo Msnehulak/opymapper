@@ -27,6 +27,20 @@ class FileProperty:
         instance.beatmap[self.category][self.key] = file_name
 
 
+class TextProperty:
+    def __init__(self, category: str, key: str):
+        self.category = category
+        self.key = key
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        return instance.beatmap[self.category].get(self.key)
+
+    def __set__(self, instance, value: str):
+        instance.beatmap[self.category][self.key] = value
+
+
 class StatProperty:
     def __init__(self, category: str, key: str):
         self.category = category

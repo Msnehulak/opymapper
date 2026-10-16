@@ -1,5 +1,6 @@
 import os
 import shutil
+import zipfile
 from pathlib import Path
 from typing import List
 
@@ -15,16 +16,6 @@ NEED_DIFF_CONTENT = {
 }
 
 
-def memory_to_disk(fs, src_dir, dst_dir):
-    os.makedirs(dst_dir, exist_ok=True)
-    for path in fs.find(src_dir):
-        rel = os.path.relpath(path, src_dir)
-        target = os.path.join(dst_dir, rel)
-        os.makedirs(os.path.dirname(target), exist_ok=True)
-        with fs.open(path, "rb") as fsrc, open(target, "wb") as fdst:
-            fdst.write(fsrc.read())
-
-
 class CreateMap:
     ar = ShareP.StatProperty("Difficulty", "ApproachRate")
     cs = ShareP.StatProperty("Difficulty", "CircleSize")
@@ -36,6 +27,10 @@ class CreateMap:
 
     artist = ShareP.UnicodeProperty("Metadata", "Artist", is_ascii_target=True)
     artist_unicode = ShareP.UnicodeProperty("Metadata", "Artist", is_ascii_target=False)
+
+    version = ShareP.TextProperty("Metadata", "Version")
+    creator = ShareP.TextProperty("Metadata", "Creator")
+    source = ShareP.TextProperty("Metadata", "Source")
 
     audio = ShareP.FileProperty("General", "AudioFilename")
 
@@ -60,31 +55,45 @@ class CreateMap:
 
         self.diffs.append(diff)
 
-    def save_all(self, output_dir: str) -> None:
+    def save_all(self, file_name: str, save_path: Path = Path.cwd()) -> None:
         fs = fsspec.filesystem("memory")
+        external_files = []
 
         for diff in self.diffs:
             self.validate_diff(diff)
             diff_content = diff.get_beatmap_content().replace("\n", "\r\n")
-            diff_name = f"{diff.title} - {diff.artist} (akjsh) [shhsj].osu"
+            diff_name = (
+                f"{diff.title} - {diff.artist} ({diff.creator}) [{diff.version}].osu"
+            )
             with fs.open(f"/osu_map/{diff_name}", "w") as f:
                 f.write(diff_content)
 
-            for ex_file in diff.files:
-                fs.put(str(ex_file["path"]), f"/osu_map/{ex_file['name']}")
+            external_files.extend(diff.files)
+        external_files.extend(self.files)
 
-        for ex_file in self.files:
-            fs.put(str(ex_file["path"]), f"/osu_map/{ex_file['name']}")
+        target_zip = save_path / f"{file_name}.zip"
+        target_osz = save_path / f"{file_name}.osz"
 
-        output_path = Path(output_dir).resolve()
-        if output_path.exists():
-            shutil.rmtree(output_path)
-        output_path.mkdir(parents=True)
+        with zipfile.ZipFile(
+            target_zip, "w", compression=zipfile.ZIP_STORED
+        ) as zip_out:
+            # From fsspec
+            for path in fs.find(""):
+                with fs.open(path, "rb") as f_in:
+                    arcname = os.path.basename(path)
+                    if arcname:
+                        zip_out.writestr(arcname, f_in.read())
 
-        memory_to_disk(fs, "/osu_map", output_path)
+            # External Files
+            for file in external_files:
+                with (
+                    zip_out.open(file["name"], "w") as target_file,
+                    open(str(file["path"]), "rb") as source_file,
+                ):
+                    while chunk := source_file.read(1024 * 1024):
+                        target_file.write(chunk)
 
-        shutil.make_archive(str(output_path), "zip", output_path)
-        os.replace(f"{output_path}.zip", f"{output_path}.osz")
+        os.rename(target_zip, target_osz)
 
     def validate_diff(
         self, diff: CreateDiff, _ignore_mising_trait: bool = False
@@ -118,5 +127,7 @@ class CreateMap:
         self.od = 5
         self.cs = 5
 
-        self.title = "Auto create map"
+        self.title = "Auto Created map"
         self.artist = "opymapper"
+        self.version = "Auto created"
+        self.creator = "Osu Python Maper"

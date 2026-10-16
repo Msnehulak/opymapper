@@ -28,6 +28,10 @@ class CreateDiff:
     artist = ShareP.UnicodeProperty("Metadata", "Artist", is_ascii_target=True)
     artist_unicode = ShareP.UnicodeProperty("Metadata", "Artist", is_ascii_target=False)
 
+    version = ShareP.TextProperty("Metadata", "Version")
+    creator = ShareP.TextProperty("Metadata", "Creator")
+    source = ShareP.TextProperty("Metadata", "Source")
+
     audio = ShareP.FileProperty("General", "AudioFilename")
 
     def __init__(self) -> None:
