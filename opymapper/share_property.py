@@ -41,10 +41,20 @@ class TextProperty:
         instance.beatmap[self.category][self.key] = value
 
 
-class StatProperty:
-    def __init__(self, category: str, key: str):
+class NumberProperty:
+    def __init__(
+        self,
+        category: str,
+        key: str,
+        max: float = 10.0,
+        min: float = 10.0,
+        round_to: int = 1,
+    ):
         self.category = category
         self.key = key
+        self.max = max
+        self.min = min
+        self.round_to = round_to
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -52,14 +62,16 @@ class StatProperty:
         return instance.beatmap[self.category].get(self.key)
 
     def __set__(self, instance, value: float):
-        if not (0.0 <= value <= 10.0):
-            raise ValueError(f"{self.key} must be between 0.0 and 10.0, got {value}")
-
-        if round(value, 1) != value:
-            logging.warning(
-                f"{value} has more than one decimal place, rounded to {round(value, 1)}"
+        if not (self.min <= value <= self.max):
+            raise ValueError(
+                f"{self.key} must be between {self.min} and {self.max}, got {value}"
             )
-        instance.beatmap[self.category][self.key] = round(value, 1)
+
+        if round(value, self.round_to) != value:
+            logging.warning(
+                f"[{self.category}:{self.key}] {value} has more than {self.round_to} decimal place(s), rounded to {round(value, self.round_to)}"
+            )
+        instance.beatmap[self.category][self.key] = round(value, self.round_to)
 
 
 class ColorProperty:

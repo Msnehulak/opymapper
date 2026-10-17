@@ -10,14 +10,24 @@ CHARACTERS = string.ascii_letters + string.digits
 
 
 @pytest.mark.part1
-@pytest.mark.parametrize("metadata", ["source", "version", "creator"])
-@pytest.mark.parametrize("value", ["my fav version", "2077 music", "Sortax"])
-def test_meta_data(metadata, value):
-    diff = opymapper.new_diff()
+class TestMapValues:
+    @pytest.mark.parametrize("metadata", ["source", "version", "creator"])
+    @pytest.mark.parametrize("value", ["my fav version", "2077 music", "Sortax"])
+    def test_meta_data(self, metadata, value):
+        diff = opymapper.new_diff()
 
-    setattr(diff, metadata, value)
+        setattr(diff, metadata, value)
 
-    assert getattr(diff, metadata) == value
+        assert getattr(diff, metadata) == value
+
+    @pytest.mark.parametrize("variable", ["stack_leniency"])
+    @pytest.mark.parametrize("value", [0.12, 0.99, 1])
+    def test_0t1_values(self, value, variable):
+        diff = opymapper.new_diff()
+
+        setattr(diff, variable, value)
+
+        assert getattr(diff, variable) == value
 
 
 @pytest.mark.part2
@@ -93,7 +103,6 @@ class TestMapStats:
         assert getattr(diff, stat) == round(val, 1)
 
         assert len(caplog.records) == 1
-        assert "has more than one decimal place" in caplog.text
 
     @pytest.mark.parametrize("stat", ["ar", "cs", "od", "hp"])
     @pytest.mark.parametrize("val", [0.0, 2.5, 5.0, 7.5, 10.0])

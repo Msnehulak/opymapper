@@ -20,11 +20,10 @@ for i in range(10):
         x=int(CX + (SX * 1)), y=int(CY + (SY * 1)), time=800 + i * 1000, new_combo=True
     )
 
-diff.audio = "other/audio.ogg"
 diff.add_slider(
     x=56,
     y=32,
-    time=6500,
+    time=10200,
     curve_type="L",
     points=[
         (76, 192),
@@ -36,9 +35,13 @@ diff.add_slider(
     ],
 )
 
+for i in range(10):
+    diff.add_circle(x=int(CX), y=int(CY), time=12000 + i * 200)
+
 diff.version = "my version"
 diff.creator = "pepa"
-
+diff.stack_leniency = 0
+diff.audio = "other/audio.ogg"
 
 mapset = opymapper.new_mapset()
 

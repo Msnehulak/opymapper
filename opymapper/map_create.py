@@ -17,10 +17,11 @@ NEED_DIFF_CONTENT = {
 
 
 class CreateMap:
-    ar = ShareP.StatProperty("Difficulty", "ApproachRate")
-    cs = ShareP.StatProperty("Difficulty", "CircleSize")
-    hp = ShareP.StatProperty("Difficulty", "HPDrainRate")
-    od = ShareP.StatProperty("Difficulty", "OverallDifficulty")
+    _md_help = {"min": 0.0, "max": 10.0, "round_to": 1}
+    ar = ShareP.NumberProperty("Difficulty", "ApproachRate", **_md_help)
+    cs = ShareP.NumberProperty("Difficulty", "CircleSize", **_md_help)
+    hp = ShareP.NumberProperty("Difficulty", "HPDrainRate", **_md_help)
+    od = ShareP.NumberProperty("Difficulty", "OverallDifficulty", **_md_help)
 
     title = ShareP.UnicodeProperty("Metadata", "Title", is_ascii_target=True)
     title_unicode = ShareP.UnicodeProperty("Metadata", "Title", is_ascii_target=False)
@@ -33,6 +34,9 @@ class CreateMap:
     source = ShareP.TextProperty("Metadata", "Source")
 
     audio = ShareP.FileProperty("General", "AudioFilename")
+    stack_leniency = ShareP.NumberProperty(
+        "General", "StackLeniency", min=0.0, max=1.0, round_to=2
+    )
 
     def __init__(self) -> None:
         self.beatmap = {

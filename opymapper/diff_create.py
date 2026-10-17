@@ -8,10 +8,11 @@ ADD_TO_BEAT_MAP = ["General", "Metadata", "Difficulty", "Colours", "HitObjects"]
 
 
 class CreateDiff:
-    ar = ShareP.StatProperty("Difficulty", "ApproachRate")
-    cs = ShareP.StatProperty("Difficulty", "CircleSize")
-    hp = ShareP.StatProperty("Difficulty", "HPDrainRate")
-    od = ShareP.StatProperty("Difficulty", "OverallDifficulty")
+    _md_help = {"min": 0.0, "max": 10.0, "round_to": 1}
+    ar = ShareP.NumberProperty("Difficulty", "ApproachRate", **_md_help)
+    cs = ShareP.NumberProperty("Difficulty", "CircleSize", **_md_help)
+    hp = ShareP.NumberProperty("Difficulty", "HPDrainRate", **_md_help)
+    od = ShareP.NumberProperty("Difficulty", "OverallDifficulty", **_md_help)
 
     color_combo_1 = ShareP.ColorProperty("Colours", "Combo1")
     color_combo_2 = ShareP.ColorProperty("Colours", "Combo2")
@@ -33,6 +34,10 @@ class CreateDiff:
     source = ShareP.TextProperty("Metadata", "Source")
 
     audio = ShareP.FileProperty("General", "AudioFilename")
+
+    stack_leniency = ShareP.NumberProperty(
+        "General", "StackLeniency", min=0.0, max=1.0, round_to=2
+    )
 
     def __init__(self) -> None:
         self.beatmap = {
