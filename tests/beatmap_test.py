@@ -10,39 +10,14 @@ CHARACTERS = string.ascii_letters + string.digits
 
 
 @pytest.mark.part1
-def test_new_diff():
-    test_title = "".join(random.choices(CHARACTERS, k=10))
-    test_ar = random.randint(0, 10)
-    test_hp = random.randint(0, 10)
-    test_cs = random.randint(0, 10)
-    test_od = random.randint(0, 10)
-
+@pytest.mark.parametrize("metadata", ["source", "version", "creator"])
+@pytest.mark.parametrize("value", ["my fav version", "2077 music", "Sortax"])
+def test_meta_data(metadata, value):
     diff = opymapper.new_diff()
-    diff.title = test_title
-    diff.ar = test_ar
-    diff.od = test_od
-    diff.hp = test_hp
-    diff.cs = test_cs
 
-    diff_test_format = f"""osu file format v14
+    setattr(diff, metadata, value)
 
-[General]
-
-[Metadata]
-Title:{test_title}
-
-[Difficulty]
-ApproachRate:{test_ar}
-OverallDifficulty:{test_od}
-HPDrainRate:{test_hp}
-CircleSize:{test_cs}
-
-[Colours]
-
-[HitObjects]
-"""
-    # TODO fix
-    assert True  # diff.get_beatmap_content() == diff_test_format
+    assert getattr(diff, metadata) == value
 
 
 @pytest.mark.part2

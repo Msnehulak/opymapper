@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Annotated, List, Literal, Optional, Tuple
+from typing import Annotated, List, Literal, Optional, Tuple, Union
 
 from pydantic import Field, validate_call
 
@@ -7,6 +7,8 @@ from .slider_lenght import calculate_slider_length
 
 XLimit = Annotated[int, Field(ge=0, le=512)]
 YLimit = Annotated[int, Field(ge=0, le=384)]
+FolowPointTypes = Literal["L", "B", "P", "C"]
+PointType = Union[tuple[XLimit, YLimit] | tuple[XLimit, YLimit, FolowPointTypes]]
 
 
 class BaseHitObject(ABC):
@@ -57,8 +59,8 @@ class Slider(BaseHitObject):
         x: XLimit,
         y: YLimit,
         time: int,
-        curve_type: str,  # 'L', 'B', 'P', 'C'
-        points: List[Tuple[XLimit, YLimit]],
+        curve_type: FolowPointTypes,
+        points: List[PointType] = [],
         repeats: int = 1,
         length: float | None = None,
         **kwargs,
@@ -75,9 +77,15 @@ class Slider(BaseHitObject):
 
     def to_osu_string(self) -> str:
         type_val = self._get_type_bitmask(2)
-        points_str = "|".join(f"{p[0]}:{p[1]}" for p in self.points)
-        curve_str = f"{self.curve_type}|{points_str}"
-        return f"{self.x},{self.y},{self.time},{type_val},{self.hit_sound},{curve_str},{self.repeats},{self.length:.2f}"
+        curve = [self.curve_type]
+        for point in self.points:
+            if len(point) == 3:
+                curve.append(point[2])
+
+            curve.append(f"{point[0]}:{point[1]}")
+
+        curve_str = "|".join(curve)
+        return f"{self.x},{self.y},{self.time},{type_val},{self.hit_sound},{curve_str},{self.repeats},{self.length:.0f}"
 
 
 class Spinner(BaseHitObject):
